@@ -3,6 +3,7 @@
 
 import React from 'react';
 import Button from 'react-bootstrap/Button';
+import ListGroup from 'react-bootstrap/ListGroup';
 import Form from 'react-bootstrap/Form';
 import PlayArrow from '@material-ui/icons/PlayArrow';
 import Videocam from '@material-ui/icons/Videocam';
@@ -11,7 +12,12 @@ import Pause from '@material-ui/icons/Pause';
 import WbIncandescent from '@material-ui/icons/WbIncandescent';
 import './App.css';
 import * as devtools from '../../api/devtools';
-import { Fragment } from 'react';
+var xss = require('xss');
+// const createDOMPurify = require('dompurify');
+// const { JSDOM } = require('jsdom');
+ 
+// const window = new JSDOM('').window;
+// const DOMPurify = createDOMPurify(window);
 
 function App() {
   devtools.init();
@@ -38,6 +44,7 @@ function App() {
 
 
   window.addEventListener("message", function(event) {
+    console.log("Received message from devtools.");
     setProfiled(true);
     setShowModal(true);
     var result = event.data.msg.filter(function(elem:any, index:number, self:any) {
@@ -49,10 +56,10 @@ function App() {
     };
     var newRanking:any = [];
     for(var key of event.data.ranking.keys()) {
-      var jsonObject:any = {};
-      jsonObject["hypothesis"] = key.hypothesis;
-      jsonObject["confidence"] = event.data.ranking.get(key);
-      newRanking.push( jsonObject );
+      var hypothesis = key.hypothesis;
+      var confidence = event.data.ranking.get(key);
+      newRanking.push(`<strong> Hypothesis: </strong> ${hypothesis} <br></br> <strong> Confidence score: </strong>
+      ${confidence}%`);
     }
     setRanking(newRanking);
   });
@@ -78,14 +85,16 @@ function App() {
         </Form>
         <p style={{fontSize:15}}> Please click record and reproduce the defect. </p>
       </div>
-      <div className="center">
-        {!recording ? <Button onClick={() => {devtools.startProfiler(); setRecording(true)}}
-            variant="primary"
-            > <Videocam/> Start Recording </Button>
-            : <Button onClick={() => {devtools.endProfiler(tags); setRecording(false); setShowModal(true);}}
-            variant="warning"
-            > <Pause/> End Recording </Button>}
-      </div>
+      <br></br>
+      {!showModal ? <div className="center">
+          {!recording ? <Button onClick={() => {devtools.startProfiler(); setRecording(true)}}
+              variant="primary"
+              > <Videocam/> Start Recording </Button>
+              : <Button onClick={() => {devtools.endProfiler(tags); setRecording(false); setShowModal(true);}}
+              variant="warning"
+              > <Pause/> End Recording </Button>}
+        </div> : <div></div>}
+
       {showModal ?
       <div>        
         <Modal.Dialog>
@@ -94,14 +103,19 @@ function App() {
           </Modal.Header>
 
           <Modal.Body>
-            <h1>Hypotheses Ranking</h1>
+            <p> <strong> Tags generated from your description: </strong> {tags.map<React.ReactNode>(t => <span>{t}</span>).reduce((prev, curr) => [prev, ', ', curr])} </p>
+            <strong style={{fontSize: 20}}> Hypothesis Ranking </strong>
+            <ListGroup>
             {profiled ? <div> {ranking.map((entry:any) => (
-                                <p> <strong> Hypothesis: </strong> {entry.hypothesis} <strong> Confidence score: </strong>
-                                 {entry.confidence}% </p>
+                                <ListGroup.Item dangerouslySetInnerHTML={{__html: xss(entry)}}></ListGroup.Item>
                               ))} 
                         </div> : <div> Loading... </div>}
-            <h1>Execution Trace</h1>
-            {profiled ? <div> {results.map(text => <p>{text}</p>)} </div> : <div> Loading... </div>}
+            </ListGroup>
+            <br/>
+            <strong style={{fontSize: 20}}> Execution Trace </strong>
+            <ListGroup>
+              {profiled ? <div> {results.map(text => <ListGroup.Item dangerouslySetInnerHTML={{__html: xss(text)}}></ListGroup.Item>)} </div> : <div> Loading... </div>}
+            </ListGroup>
           </Modal.Body>
 
           <Modal.Footer>
@@ -110,6 +124,7 @@ function App() {
         </Modal.Dialog>
       </div>
       : <div></div>}
+
     </div>
   );
 }

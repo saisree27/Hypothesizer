@@ -22,9 +22,11 @@ const init = () => {
                 const files: any[] = await getSourceCodeFiles();
                 const coverage = await analyzeCode(message.msg, files);
                 const hypotheses = await useTags(message.tags, files);
+                console.log("Sending to App.tsx");
                 if(!alreadySent) {
                     window.postMessage({ msg: coverage, ranking: hypotheses }, "*");
                     alreadySent = true;
+                    console.log("Sent to App.tsx!");
                 }
             } catch (error) {
                 console.error(error);

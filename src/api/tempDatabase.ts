@@ -1,7 +1,7 @@
 var data:any = [
     {
         tags: ["button", "onclick", "callback"],
-        hypothesis: "The callback of onClick is defined incorrectly for your button. Try using onClick={() => function()}",
+        hypothesis: "The callback of onClick is defined incorrectly for your button. Try using <code>onClick={() => function()}</code>",
         verification: 0
     },
     {
