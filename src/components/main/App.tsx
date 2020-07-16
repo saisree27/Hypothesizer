@@ -5,7 +5,7 @@ import React from 'react';
 import Button from 'react-bootstrap/Button';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Form from 'react-bootstrap/Form';
-import PlayArrow from '@material-ui/icons/PlayArrow';
+import Spinner from 'react-bootstrap/Spinner';
 import Videocam from '@material-ui/icons/Videocam';
 import Modal from 'react-bootstrap/Modal'
 import Pause from '@material-ui/icons/Pause';
@@ -109,12 +109,12 @@ function App() {
             {profiled ? <div> {ranking.map((entry:any) => (
                                 <ListGroup.Item dangerouslySetInnerHTML={{__html: xss(entry)}}></ListGroup.Item>
                               ))} 
-                        </div> : <div> Loading... </div>}
+                        </div> : <div className="center"> <br></br> <Spinner animation="border" /> </div>}
             </ListGroup>
             <br/>
             <strong style={{fontSize: 20}}> Execution Trace </strong>
             <ListGroup>
-              {profiled ? <div> {results.map(text => <ListGroup.Item dangerouslySetInnerHTML={{__html: xss(text)}}></ListGroup.Item>)} </div> : <div> Loading... </div>}
+              {profiled ? <div> {results.map(text => <ListGroup.Item dangerouslySetInnerHTML={{__html: xss(text)}}></ListGroup.Item>)} </div> : <div className="center"> <br></br> <Spinner animation="border" /> </div>}
             </ListGroup>
           </Modal.Body>
 

@@ -88,6 +88,65 @@ const useTags = async (tags:any, files:any) => {
             case 2:
                 // nothing necessary, temporary demo
                 break
+            case 3:
+                var confidence = 0;
+                for(var ast of asts) {
+                    estree.walk(ast.tree, {
+                        enter: (node: any, parent: any, prop: any, index: any) => {
+                            if(node.type == "JSXElement") {
+                                if(node.openingElement.name.type == "JSXIdentifier") {
+                                    if(node.openingElement.name.name == "input") {
+                                        var foundOnChange = false;
+                                        for(var obj of node.openingElement.attributes) {
+                                            if(obj.name.name == "onChange") {
+                                                foundOnChange = true;
+                                            }
+                                        }
+                                        if(!foundOnChange) confidence = 100;
+                                    }
+                                }
+                            }
+                            
+                        },
+                        leave: (node, parent, prop, index) => { }
+                    })
+                }
+                returnObj.set(entry, confidence);
+                break
+            case 4:
+                var confidence = 0;
+                for(var ast of asts) {
+                    estree.walk(ast.tree, {
+                        enter: (node: any, parent: any, prop: any, index: any) => {
+                            if (node.type === "JSXAttribute") {
+                                if (node.name.name === "onChange") {
+                                    if(node.value.expression.type === "CallExpression") {
+                                       confidence = 100;
+                                    } 
+                                }
+                            }
+                        },
+                        leave: (node, parent, prop, index) => { }
+                    })
+                }
+                returnObj.set(entry, confidence);
+                break
+            case 5:
+                var confidence = 0;
+                if(tags.includes("immediately")) {
+                    confidence += 20; 
+                }
+                if(tags.includes("state")) {
+                    confidence += 40;
+                }
+                if(tags.includes("update") || tags.includes("change")) {
+                    confidence += 20;
+                }
+                if(tags.includes("setstate")) {
+                    confidence += 20;
+                }
+                returnObj.set(entry, confidence);
+                break
             default:
                 break
         }
